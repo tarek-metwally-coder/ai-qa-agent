@@ -1,7 +1,16 @@
 import requests
 import json
 
+def claim_submission_test():
+    print("Running claim submission Playwright test...")
+
 allowed_tools = ["claim_submission_test", "login_test", "payment_flow_test", "unknown"]
+tool_map = {
+    "claim_submission_test": claim_submission_test,
+}
+required_fields = ["intent", "priority", "tool", "reason"]
+
+
 prompt = f"""
 You are an AI QA routing assistant.
 
@@ -48,6 +57,10 @@ print(raw_ai_response)
 
 parsed = json.loads(raw_ai_response)
 
+for field in required_fields:
+    if field not in parsed:
+        raise ValueError(f"Missing required field: {field}")
+
 print("\nParsed fields:")
 print("Intent:", parsed["intent"])
 print("Priority:", parsed["priority"])
@@ -55,5 +68,12 @@ print("Raw Tool:", parsed["tool"])
 if parsed["tool"] not in allowed_tools:
     parsed["tool"] = "unknown"
 
+
+
 print("Tool:", parsed["tool"])
 print("Reason:", parsed["reason"])
+
+if parsed["tool"] in tool_map:
+    tool_map[parsed["tool"]]()
+else:
+    print("No valid tool selected. Human review needed.")
